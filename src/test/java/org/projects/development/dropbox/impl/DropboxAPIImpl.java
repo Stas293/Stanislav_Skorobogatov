@@ -135,7 +135,10 @@ public class DropboxAPIImpl implements DropboxAPI {
                 .build();
         log.info("Deleting file: {}", path);
 
-        HttpResponse<String> send = client.send(request, HttpResponse.BodyHandlers.ofString());
-        log.info("Response: {}", send);
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        log.info("Response: {}", response);
+        if (response.statusCode() != 200){
+            throw new RuntimeException("File was not deleted");
+        }
     }
 }
