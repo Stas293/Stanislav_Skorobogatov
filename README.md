@@ -18,6 +18,10 @@ The tests are run in the FireFox browser by default.
 
 You can add driver for other browsers in the `src/test/resources/drivers` folder and change the browser in the ObjectFactory class.
 
+![img.png](img.png)
+![img_1.png](img_1.png)
+![img_2.png](img_2.png)
+
 ## How to run tests
 
 1. Open terminal in project folder
