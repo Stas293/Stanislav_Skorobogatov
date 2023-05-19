@@ -7,11 +7,11 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.projects.development.dropbox.DropboxAPI;
-import org.projects.development.dropbox.factories.DropboxFactory;
+import org.projects.development.factories.ObjectFactory;
 import org.projects.development.model.Entry;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -26,19 +26,16 @@ public class DropboxAPIManagementTest {
     private Optional<Entry> fileMetadata;
 
     public DropboxAPIManagementTest() {
-        dropboxAPI = DropboxFactory.getDropboxAPI();
+        dropboxAPI = ObjectFactory.getObject(DropboxAPI.class);
         MAIN_FILE_PATH = Path.of("mainFile.txt");
         FILE_FROM_DROPBOX_PATH = Path.of("fileFromDropbox.txt");
     }
 
     @Given("the file is created")
+    @SneakyThrows
     public void createNewFile() {
-        try {
-            log.info("Creating a file");
-            Files.write(MAIN_FILE_PATH, "Some important info".getBytes());
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Could not create the file: %s", e));
-        }
+        log.info("Creating a file");
+        Files.write(MAIN_FILE_PATH, "Some important info".getBytes());
     }
 
     @When("user uploads the file")
@@ -52,19 +49,21 @@ public class DropboxAPIManagementTest {
         log.info("Checking the file upload");
         List<Entry> entries = dropboxAPI.getFileList();
 
+        Assertions.assertFalse(entries.isEmpty(), "Could not get the file");
+
         for (Entry entry : entries) {
             if (entry.getName().equals(MAIN_FILE_PATH.toString())) {
                 return;
             }
         }
         log.error("Could not get the file");
-        throw new RuntimeException("Could not get the file");
+        Assertions.fail("Could not get the file");
     }
 
     @And("user requests file's metadata")
     public void getFileMetadata() {
         log.info("Getting the file metadata");
-        fileMetadata = dropboxAPI.getFileMetadata(MAIN_FILE_PATH);
+        this.fileMetadata = dropboxAPI.getFileMetadata(MAIN_FILE_PATH);
     }
 
     @Then("file's metadata is received")
@@ -72,7 +71,7 @@ public class DropboxAPIManagementTest {
         log.info("Checking the file metadata");
         if (fileMetadata.isEmpty()) {
             log.error("Could not get the file metadata");
-            throw new RuntimeException("Could not get the file metadata");
+            Assertions.fail("Could not get the file metadata");
         }
     }
 
@@ -85,11 +84,7 @@ public class DropboxAPIManagementTest {
     @Then("there is no file on Dropbox")
     public void checkFileAbsent() {
         log.info("Checking the file deletion");
-        boolean success = dropboxAPI.download(MAIN_FILE_PATH, FILE_FROM_DROPBOX_PATH);
-        if (success){
-            log.error("Could not delete the file");
-            throw new RuntimeException("Could not delete the file");
-        }
+        dropboxAPI.downloadNonExisting(MAIN_FILE_PATH);
     }
 
     @After

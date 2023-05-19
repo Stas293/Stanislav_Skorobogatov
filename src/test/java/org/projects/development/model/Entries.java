@@ -1,6 +1,6 @@
 package org.projects.development.model;
 
-import io.cucumber.core.internal.com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
